@@ -7,13 +7,13 @@
 #define CYAN "\033[36m"
 #define WHITE "\033[37m"
 
-#include <arpa/inet.h>
+#include "./Client.hpp"
+#include "./Socket.hpp"
 #include <cerrno>
 #include <cstdlib>
 #include <iostream>
 #include <poll.h>
 #include <sstream>
-#include <sys/socket.h>
 #include <unistd.h>
 
 #define PORT 8080
