@@ -35,7 +35,7 @@ void Socket::createSocket(int domain, int type, int protocol) {
   }
 }
 
-void Socket::bintSocket(sa_family_t sin_family, in_port_t sin_port,
+void Socket::bindSocket(sa_family_t sin_family, in_port_t sin_port,
                         in_addr_t sin_addr) {
   server_addr_.sin_family = sin_family;
   server_addr_.sin_port = sin_port;
