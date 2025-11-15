@@ -41,7 +41,7 @@ void Socket::bintSocket(sa_family_t sin_family, in_port_t sin_port,
   server_addr_.sin_port = sin_port;
   server_addr_.sin_addr.s_addr = sin_addr;
 
-  if (bind(server_fd_, (struct sockaddr *)&server_addr_, sizeof(server_addr_)) <
+  if (bind(server_fd_, (struct sockaddr *)&server_addr_, server_addr_len_) <
       0) {
     std::cerr << RED << "Error: binding socket" << END << std::endl;
     exit(EXIT_FAILURE);
