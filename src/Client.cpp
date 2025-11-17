@@ -1,9 +1,10 @@
-#include "../../includes/include.hpp"
+#include "../includes/Webserver.hpp"
 
 Client::Client(void) {
   client_fd_ = 0;
   poll_fd_.events = POLLIN | POLLOUT;
   poll_fd_.revents = 0;
+  client_addr_len_ = sizeof(client_addr_);
 }
 
 Client::Client(Client &client) {

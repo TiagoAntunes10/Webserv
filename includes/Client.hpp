@@ -19,7 +19,7 @@ public:
 private:
   int client_fd_;
   struct sockaddr_in client_addr_;
-  socklen_t client_addr_len_ = sizeof(client_addr_);
+  socklen_t client_addr_len_;
   struct pollfd poll_fd_;
 };
 

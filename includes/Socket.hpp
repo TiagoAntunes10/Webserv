@@ -20,7 +20,7 @@ public:
 private:
   int server_fd_;
   struct sockaddr_in server_addr_;
-  socklen_t server_addr_len_ = sizeof(server_addr_);
+  socklen_t server_addr_len_;
 };
 
 #endif

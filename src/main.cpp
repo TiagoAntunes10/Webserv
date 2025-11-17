@@ -1,4 +1,5 @@
-#include "../includes/include.hpp"
+#include "../includes/Webserver.hpp"
+#include <cstdlib>
 
 int main(void) {
   Socket socket(AF_INET, SOCK_STREAM, 0);
@@ -11,7 +12,7 @@ int main(void) {
 
   Client client;
 
-  char *buff = new char(BUFF_SIZE);
+  char *buff = NULL;
   std::string status = "HTTP/1.1 200 OK\r\n";
   std::string header = "Content-Type: Text/html\r\n\r\n";
   std::string body = "{\
@@ -23,7 +24,12 @@ int main(void) {
 	  }";
   std::string msg = status + header + body;
 
+  http_Data dataReq;
+  HttpParser parser;
+
   while ((client.getRevents() & POLLHUP) != POLLHUP) {
+    // TODO: Refactor the use of the buffer
+    buff = new char[BUFF_SIZE];
     if (client.acceptConnection(socket) < 0)
       delete[] buff;
 
@@ -41,8 +47,14 @@ int main(void) {
         return (EXIT_FAILURE);
       }
 
-      if (bytes_received > 0)
-        std::cout << buff << std::endl;
+      if (bytes_received > 0) {
+        if (parser.parseHeader(buff, dataReq) > 0)
+          std::cout << dataReq << std::endl;
+        else {
+          std::cerr << "❌ Invalid HTTP request" << std::endl;
+          return (EXIT_FAILURE);
+        }
+      }
     }
 
     if (client.pollConnection(1, 10000) < 0)
@@ -56,7 +68,10 @@ int main(void) {
         return (EXIT_FAILURE);
       }
     }
+
+    delete[] buff;
   }
 
-  delete[] buff;
+  if (buff)
+    delete[] buff;
 }

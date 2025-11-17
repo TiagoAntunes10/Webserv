@@ -1,10 +1,15 @@
-#include "../../includes/include.hpp"
+#include "../includes/Webserver.hpp"
 
-Socket::Socket(void) { server_fd_ = 0; }
+// TODO: Create exceptions maybe?
+Socket::Socket(void) {
+  server_fd_ = 0;
+  server_addr_len_ = sizeof(server_addr_);
+}
 
 // TODO: Create utils directory with function to write error messages
 Socket::Socket(int domain, int type, int protocol) {
   server_fd_ = socket(domain, type, protocol);
+  server_addr_len_ = sizeof(server_addr_);
 
   if (server_fd_ < 0) {
     std::cerr << RED << "Error: socket creation" << END << std::endl;
