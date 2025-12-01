@@ -15,6 +15,18 @@ Socket::Socket(int domain, int type, int protocol) {
     std::cerr << RED << "Error: socket creation" << END << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  int reuse_addr = 1;
+
+  // Changing the opts in the socket to avoid TIME_WAIT problems
+  if (setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
+                 sizeof(reuse_addr)) < 0) {
+    std::cerr << RED << "Error: setting socket opts" << END << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  // Make socket non blocking
+  set_non_blocking(server_fd_);
 }
 
 Socket::Socket(Socket &sock) {
@@ -31,13 +43,29 @@ Socket &Socket::operator=(Socket &sock) {
 
 Socket::~Socket(void) { close(server_fd_); }
 
+// TODO: Confirm if this method will be used (maybe it can be deleted)
 void Socket::createSocket(int domain, int type, int protocol) {
+  if (server_fd_ > 0)
+    close(server_fd_);
+
   server_fd_ = socket(domain, type, protocol);
 
   if (server_fd_ < 0) {
     std::cerr << RED << "Error: socket creation" << END << std::endl;
     exit(EXIT_FAILURE);
   }
+
+  int reuse_addr = 1;
+
+  // Changing the opts in the socket to avoid TIME_WAIT problems
+  if (setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
+                 sizeof(reuse_addr)) < 0) {
+    std::cerr << RED << "Error: setting socket opts" << END << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  // Make socket non blocking
+  set_non_blocking(server_fd_);
 }
 
 void Socket::bindSocket(sa_family_t sin_family, in_port_t sin_port,
