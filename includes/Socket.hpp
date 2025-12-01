@@ -1,7 +1,9 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 
+#include "./utils.hpp"
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 
 class Socket {

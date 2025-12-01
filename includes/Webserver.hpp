@@ -30,6 +30,7 @@
 #include "./Client.hpp"
 #include "./HttpParser.hpp"
 #include "./Socket.hpp"
+#include "./utils.hpp"
 #include <algorithm>
 #include <cctype> //tolower
 #include <cerrno>

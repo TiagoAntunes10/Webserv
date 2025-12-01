@@ -1,26 +1,34 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+#include "./HttpParser.hpp"
 #include "./Socket.hpp"
+#include <iostream>
+#include <map>
 #include <poll.h>
+#include <vector>
 
 class Client {
 public:
+  typedef std::vector<int>::iterator iterator;
+
   Client(void);
+  Client(int backlog, Socket &socket);
   Client(Client &client);
   Client &operator=(Client &client);
   ~Client(void);
-  int acceptConnection(Socket &socket);
-  // NOTE: timeout is in miliseconds
-  int pollConnection(nfds_t num_fds, int timeout);
-  int getRevents(void);
-  int getClientFd(void);
+  void initClient(int backlog, Socket &socket);
+  void buildFdList(Socket &socket);
+  void createNewConnection(Socket &socket);
+  void waitConnections(Socket &socket);
+  void getMessages(Socket &socket);
 
 private:
-  int client_fd_;
-  struct sockaddr_in client_addr_;
-  socklen_t client_addr_len_;
-  struct pollfd poll_fd_;
+  std::vector<int> client_fd_;
+  std::map<int, http_Data> requests_;
+  int backlog_;
+  fd_set socks_;
+  int highsock_;
 };
 
 #endif

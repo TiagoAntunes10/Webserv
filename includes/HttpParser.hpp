@@ -47,22 +47,23 @@ std::ostream &operator<<(std::ostream &out, const http_Data &req);
 // Class for parsisng HTTP requests
 class HttpParser {
 public:
-  unsigned short parseHeader(const std::string &request, http_Data &httpReq);
+  static unsigned short parseHeader(const std::string &request,
+                                    http_Data &httpReq);
 
-  HttpParser();  // passar para privado no programa geral
-  ~HttpParser(); // passar para privado no programa geral
+  // HttpParser();  // passar para privado no programa geral
+  // ~HttpParser(); // passar para privado no programa geral
 
 private:
   // Class is not instantiable
-  // HttpParser();
-  //~HttpParser();
+  HttpParser();
+  ~HttpParser();
 
   // Methods
   static bool existMethod(const std::string &method);
   static bool isValidMethod(const std::string &method);
   static bool isValidVersion(const std::string &version);
   static bool isValidUrl(const std::string &url);
-  std::string decode(const std::string &encoded);
+  static std::string decode(const std::string &encoded);
 
   static std::string trimWhiteBounds(const std::string &str);
   static void trimNullEnd(std::string &str);
