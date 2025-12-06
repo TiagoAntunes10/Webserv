@@ -12,15 +12,6 @@
 
 #pragma once
 
-#define END "\033[0m"
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define BLUE "\033[34m"
-#define MAGENTA "\033[35m"
-#define CYAN "\033[36m"
-#define WHITE "\033[37m"
-
 // TODO: Remove these macros if they are not necessary
 #define PORT 8080
 #define BACKLOG 10
@@ -29,11 +20,13 @@
 // INCLUDES
 #include "./Client.hpp"
 #include "./HttpParser.hpp"
+#include "./Logger.hpp"
 #include "./Socket.hpp"
 #include "./utils.hpp"
 #include <algorithm>
 #include <cctype> //tolower
 #include <cerrno>
+#include <cstdio>
 #include <cstdlib> //exit() and EXIT_FAILURE
 #include <cstring>
 #include <iomanip>
