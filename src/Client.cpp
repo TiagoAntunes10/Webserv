@@ -42,12 +42,11 @@ void Client::buildFdList(Socket &socket) {
   iterator it = client_fd_.begin();
   iterator end = client_fd_.end();
 
-  FD_ZERO(&socks_);
-
-  FD_SET(socket.getServerFd(), &socks_);
+  FD_SET(socket.getServerFd(), &read_socks_);
 
   for (; it != end; it++) {
-    FD_SET(*it, &socks_);
+    if (!FD_ISSET(*it, &read_socks_) && !FD_ISSET(*it, &write_socks_))
+      FD_SET(*it, &read_socks_);
     if (*it > highsock_)
       highsock_ = *it;
   }
@@ -58,19 +57,24 @@ void Client::createNewConnection(Socket &socket) {
 
   connection = accept(socket.getServerFd(), NULL, NULL);
   if (connection < 0) {
-    std::cerr << RED << "Error: Client/Server Connection" << END << std::endl;
+    Logger::consoleMsg(std::cerr, RED, "%s", "Error: Client/Server Connection");
     exit(EXIT_FAILURE);
   }
 
-  set_non_blocking(connection);
+  if (!set_non_blocking(connection)) {
+    Logger::consoleMsg(std::cerr, RED, "%s%d%s",
+                       "Error: Setting fd=", connection, " as non-blocking");
+    return;
+  }
 
   if ((int)client_fd_.size() < backlog_) {
     client_fd_.push_back(connection);
-    std::cout << GREEN << "Connection accepted: FD=" << connection
-              << "; Slot=" << client_fd_.size() << END << std::endl;
+    Logger::consoleMsg(std::cout, GREEN, "%s%d%s%d",
+                       "Connection accepted: FD=", connection,
+                       "; Slot=", client_fd_.size());
   } else {
     // TODO: Send a message to the client
-    std::cerr << YELLOW << "No space for new clients!" << END << std::endl;
+    Logger::consoleMsg(std::cerr, YELLOW, "%s", "No space for new clients!");
     close(connection);
   }
 }
@@ -85,10 +89,10 @@ void Client::waitConnections(Socket &socket) {
   read_socks = select(highsock_ + 1, &socks_, NULL, NULL, &timeout);
 
   if (read_socks < 0) {
-    std::cerr << YELLOW << "Error: selecting connections" << END << std::endl;
+    Logger::consoleMsg(std::cerr, YELLOW, "%s", "Error: selecting connections");
     exit(EXIT_FAILURE);
   } else if (read_socks == 0)
-    std::cout << CYAN << "..." << END << std::endl;
+    Logger::consoleMsg(std::cout, CYAN, "%s", "...");
   else
     getMessages(socket);
 }
@@ -99,38 +103,42 @@ void Client::getMessages(Socket &socket) {
   unsigned short stat;
   http_Data dataReq;
 
-  if (FD_ISSET(socket.getServerFd(), &socks_))
+  if (FD_ISSET(socket.getServerFd(), &read_socks_))
     createNewConnection(socket);
 
   iterator it = client_fd_.begin();
   iterator end = client_fd_.end();
 
-  for (; it != end; it++)
-    if (FD_ISSET(*it, &socks_)) {
+  for (; it != end; it++) {
+    if (FD_ISSET(*it, &read_socks_)) {
       ssize_t bytes_received = recv(*it, buff, BUFF_SIZE, 0);
 
       if (bytes_received < 0) {
         if (buff)
           delete[] buff;
-        std::cerr << RED << "Error: Receiving message" << END << std::endl;
-        exit(EXIT_FAILURE);
-      }
+        Logger::consoleMsg(std::cerr, RED, "%s", "Error: Receiving message");
+      } else if (bytes_received > 0) {
+        stat = HttpParser::parseHeader(buff, dataReq);
 
-      if (bytes_received > 0) {
-        if (!(stat = HttpParser::parseHeader(buff, dataReq))) {
-          std::cerr << "❌ Invalid HTTP request" << std::endl;
+        if (stat == 0) {
+          Logger::consoleMsg(std::cerr, RED, "%s", "❌ Invalid HTTP request");
           if (buff)
             delete[] buff;
           exit(EXIT_FAILURE);
+        } else {
+          requests_.insert(std::pair<int, http_Data>(*it, dataReq));
+          Logger::consoleMsg(std::cout, BLUE, "%s%d", "Request from fd=", *it);
+
+          // NOTE: Strange types (e.g. http_Data) cannot be passed to the
+          // variadic argument function in the Logger class
+          std::cout << requests_.find(*it)->second << std::endl;
+
+          FD_SET(*it, &write_socks_);
+          FD_CLR(*it, &read_socks_);
         }
       }
-
-      if (stat) {
-        requests_.insert(std::pair<int, http_Data>(*it, dataReq));
-        std::cout << BLUE << "Request from fd=" << *it << END << std::endl;
-        std::cout << requests_.find(*it)->second << std::endl;
-      }
     }
+  }
 
   if (buff)
     delete[] buff;

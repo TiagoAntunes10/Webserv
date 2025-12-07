@@ -7,16 +7,8 @@ int main(void) {
 
   socket.listenSocket(BACKLOG);
 
-  // TODO: Clean this. The real implementation will not have hardcoded ports
-  char *port = new char[5];
-  sprintf(port, "%d", PORT);
-  std::string log = "Listening on port ";
-  log.append(port);
-  log.append("...");
-  delete[] port;
-  Logger::consoleMsg(std::cout, GREEN, log);
-  // std::cout << GREEN << "Listening on port " << PORT << "..." << END
-  //           << std::endl;
+  Logger::consoleMsg(std::cout, GREEN, "%s%d%s", "Listening on port ", PORT,
+                     "...");
 
   Client client(BACKLOG, socket);
 

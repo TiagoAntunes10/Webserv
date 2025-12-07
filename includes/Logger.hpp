@@ -1,6 +1,7 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
+#include <cstdarg>
 #include <sstream>
 
 class Logger {
@@ -11,9 +12,11 @@ public:
   // Logger &getLogger(void);
 
   static void consoleMsg(std::ostream &io, std::string const colour,
-                         std::string const msg);
+                         std::string format, ...);
 
 private:
+  typedef std::string::iterator iterator;
+
   Logger(void) {};
   Logger(Logger const &log) { (void)log; };
   Logger &operator=(Logger const &log) {
