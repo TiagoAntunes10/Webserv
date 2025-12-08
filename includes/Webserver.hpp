@@ -15,10 +15,12 @@
 // TODO: Remove these macros if they are not necessary
 #define PORT 8080
 #define BACKLOG 10
+#define TIMEOUT 10
 #define BUFF_SIZE 5000
 
 // INCLUDES
 #include "./Client.hpp"
+#include "./ConnectionManager.hpp"
 #include "./HttpParser.hpp"
 #include "./Logger.hpp"
 #include "./Socket.hpp"

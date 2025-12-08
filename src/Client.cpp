@@ -24,10 +24,9 @@ Client &Client::operator=(Client const &client) {
   return (*this);
 }
 
-Client::~Client(void) {
-  if (fd_ > 0)
-    close(fd_);
-}
+// NOTE: If the fd is closed here, the fd will be closed during vector
+// operations
+Client::~Client(void) { return; }
 
 int Client::getFd(void) { return (fd_); }
 
