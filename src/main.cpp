@@ -7,10 +7,10 @@ int main(void) {
 
   socket.listenSocket(BACKLOG);
 
-  std::cout << GREEN << "Listening on port " << PORT << "..." << END
-            << std::endl;
+  Logger::consoleMsg(std::cout, GREEN, "%s%d%s", "Listening on port ", PORT,
+                     "...");
 
-  Client client(BACKLOG, socket);
+  ConnectionManager manager(BACKLOG, socket);
 
   std::string status = "HTTP/1.1 200 OK\r\n";
   std::string header = "Content-Type: Text/html\r\n\r\n";
@@ -24,8 +24,8 @@ int main(void) {
   std::string msg = status + header + body;
 
   while (1) {
-    client.buildFdList(socket);
-    client.waitConnections(socket);
+    manager.buildFdList(socket);
+    manager.waitConnections(socket);
 
     // std::string response = build_response(stat, dataReq);
     //

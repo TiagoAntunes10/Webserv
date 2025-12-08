@@ -1,19 +1,20 @@
 #include "../includes/Webserver.hpp"
 
-void set_non_blocking(int fd) {
+int set_non_blocking(int fd) {
   int opt;
 
   opt = fcntl(fd, F_GETFL);
   if (opt < 0) {
-    std::cerr << RED << "Error: getting socket status flags" << END
-              << std::endl;
-    exit(EXIT_FAILURE);
+    Logger::consoleMsg(std::cerr, RED, "%s",
+                       "Error: getting socket status flags");
+    return (0);
   }
 
   opt = opt | O_NONBLOCK;
   if (fcntl(fd, F_SETFL, opt) < 0) {
-    std::cerr << RED << "Error: setting socket status flags" << END
-              << std::endl;
-    exit(EXIT_FAILURE);
+    Logger::consoleMsg(std::cerr, RED, "%s",
+                       "Error: getting socket status flags");
+    return (0);
   }
+  return (1);
 }

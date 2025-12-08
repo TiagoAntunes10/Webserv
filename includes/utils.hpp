@@ -1,2 +1,2 @@
 // UTIL FUNCTIONS
-void set_non_blocking(int fd);
+int set_non_blocking(int fd);
