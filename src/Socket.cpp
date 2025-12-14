@@ -12,7 +12,7 @@ Socket::Socket(int domain, int type, int protocol) {
   server_addr_len_ = sizeof(server_addr_);
 
   if (server_fd_ < 0) {
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: socket creation");
+    Logger::getLogger().consoleMsg(stderr, RED, "Error: socket creation");
     exit(EXIT_FAILURE);
   }
 
@@ -21,14 +21,14 @@ Socket::Socket(int domain, int type, int protocol) {
   // Changing the opts in the socket to avoid TIME_WAIT problems
   if (setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
                  sizeof(reuse_addr)) < 0) {
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: setting socket opts");
+    Logger::getLogger().consoleMsg(stderr, RED, "Error: setting socket opts");
     exit(EXIT_FAILURE);
   }
 
   // Make socket non blocking
   if (!set_non_blocking(server_fd_)) {
-    Logger::consoleMsg(std::cerr, RED, "%s",
-                       "Error: Setting server as non-blocking");
+    Logger::getLogger().consoleMsg(stderr, RED,
+                                   "Error: Setting server as non-blocking");
     exit(EXIT_FAILURE);
   }
 }
@@ -55,7 +55,7 @@ void Socket::createSocket(int domain, int type, int protocol) {
   server_fd_ = socket(domain, type, protocol);
 
   if (server_fd_ < 0) {
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: socket creation");
+    Logger::getLogger().consoleMsg(stderr, RED, "Error: socket creation");
     exit(EXIT_FAILURE);
   }
 
@@ -64,7 +64,7 @@ void Socket::createSocket(int domain, int type, int protocol) {
   // Changing the opts in the socket to avoid TIME_WAIT problems
   if (setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
                  sizeof(reuse_addr)) < 0) {
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: setting socket opts");
+    Logger::getLogger().consoleMsg(stderr, RED, "Error: setting socket opts");
     exit(EXIT_FAILURE);
   }
 
@@ -80,14 +80,14 @@ void Socket::bindSocket(sa_family_t sin_family, in_port_t sin_port,
 
   if (bind(server_fd_, (struct sockaddr *)&server_addr_, server_addr_len_) <
       0) {
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: binding socket");
+    Logger::getLogger().consoleMsg(stderr, RED, "Error: binding socket");
     exit(EXIT_FAILURE);
   }
 }
 
 void Socket::listenSocket(int backlog) {
   if (listen(server_fd_, backlog) < 0) {
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: binding socket");
+    Logger::getLogger().consoleMsg(stderr, RED, "Error: binding socket");
     exit(EXIT_FAILURE);
   }
 }

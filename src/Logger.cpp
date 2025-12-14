@@ -2,42 +2,30 @@
 
 Logger::~Logger(void) {}
 
-// Logger &Logger::getLogger(void) { return (log_); }
+void Logger::initLogger(void) { init_time_ = time(NULL); }
 
-void Logger::consoleMsg(std::ostream &io, std::string const colour,
-                        std::string format, ...) {
-  std::stringstream stream;
+Logger &Logger::getLogger(void) {
+  static Logger logger;
+
+  return (logger);
+}
+
+// TODO: Maybe change the time stamps to microseconds
+void Logger::consoleMsg(FILE *io, const char *colour, const char *format, ...) {
   va_list args;
-  iterator begin = format.begin();
-  iterator end = format.end();
+
+  fprintf(io, "[%ld]		", (time(NULL) - init_time_));
 
   va_start(args, format);
 
-  for (; begin != end; begin++) {
-    if (*begin == '%') {
-      continue;
-    } else {
-      switch (*begin) {
-      case 's': {
-        char *str = va_arg(args, char *);
-        stream << str;
-        break;
-      }
+  if (colour) {
+    fprintf(io, "%s", colour);
+    vfprintf(io, format, args);
+    fprintf(io, "%s", END);
+  } else
+    vfprintf(io, format, args);
 
-      case 'd': {
-        unsigned int num = va_arg(args, unsigned int);
-        stream << num;
-        break;
-      }
-
-      default:
-        Logger::consoleMsg(std::cerr, RED, "%s",
-                           "Error: not a valid format string for logging");
-      }
-    }
-  }
+  fprintf(io, "\n");
 
   va_end(args);
-
-  io << colour << stream.str() << END << std::endl;
 }
