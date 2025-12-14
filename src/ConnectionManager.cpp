@@ -1,5 +1,4 @@
 #include "../includes/Webserver.hpp"
-#include <cstdlib>
 
 ConnectionManager::ConnectionManager(void) {
   backlog_ = 0;
@@ -62,13 +61,14 @@ void ConnectionManager::createNewConnection(Socket &socket) {
 
   connection = accept(socket.getServerFd(), NULL, NULL);
   if (connection < 0) {
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: Client/Server Connection");
+    Logger::getLogger().consoleMsg(stderr, RED,
+                                   "Error: Client/Server Connection");
     return;
   }
 
   if (!set_non_blocking(connection)) {
-    Logger::consoleMsg(std::cerr, RED, "%s%d%s",
-                       "Error: Setting fd=", connection, " as non-blocking");
+    Logger::getLogger().consoleMsg(
+        stderr, RED, "Error: Setting FD=%d as non-blocking", connection);
     return;
   }
 
@@ -77,12 +77,12 @@ void ConnectionManager::createNewConnection(Socket &socket) {
   if ((int)clients_.size() < backlog_) {
     clients_.push_back(client);
     clients_.back().setFd(connection);
-    Logger::consoleMsg(std::cout, GREEN, "%s%d%s%d",
-                       "Connection accepted: FD=", connection,
-                       "; Slot=", clients_.size());
+    Logger::getLogger().consoleMsg(stdout, GREEN,
+                                   "Connection accepted: FD=%d; Slot=%d",
+                                   connection, clients_.size());
   } else {
     // TODO: Send a message to the client
-    Logger::consoleMsg(std::cerr, YELLOW, "%s", "No space for new clients!");
+    Logger::getLogger().consoleMsg(stderr, YELLOW, "No space for new clients!");
     close(connection);
   }
 }
@@ -99,10 +99,10 @@ void ConnectionManager::waitConnections(Socket &socket) {
   socks = select(highsock_ + 1, &read_cpy, &write_cpy, NULL, &timeout);
 
   if (socks < 0) {
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: selecting connections");
+    Logger::getLogger().consoleMsg(stderr, RED, "Error: selecting connections");
     return;
   } else if (socks == 0)
-    Logger::consoleMsg(std::cout, CYAN, "%s", "...");
+    Logger::getLogger().consoleMsg(stdout, CYAN, "...");
   else {
     if (FD_ISSET(socket.getServerFd(), &read_cpy))
       createNewConnection(socket);
@@ -131,13 +131,13 @@ void ConnectionManager::getMessages(iterator it) {
   if (bytes_received < 0) {
     if (buff)
       delete[] buff;
-    Logger::consoleMsg(std::cerr, RED, "%s", "Error: Receiving message");
+    Logger::getLogger().consoleMsg(stderr, RED, "Error: Receiving message");
     return;
   } else if (bytes_received > 0) {
     stat = HttpParser::parseHeader(buff, dataReq);
 
     if (stat == 0) {
-      Logger::consoleMsg(std::cerr, RED, "%s", "❌ Invalid HTTP request");
+      Logger::getLogger().consoleMsg(stderr, RED, "❌ Invalid HTTP request");
       if (buff)
         delete[] buff;
 
@@ -145,10 +145,10 @@ void ConnectionManager::getMessages(iterator it) {
     } else {
       it->setRequest(dataReq);
 
-      Logger::consoleMsg(std::cout, BLUE, "%s%d",
-                         "Request from fd=", it->getFd());
+      Logger::getLogger().consoleMsg(stdout, BLUE, "Request from FD=%d",
+                                     it->getFd());
 
-      // NOTE: Strange types (e.g. http_Data) cannot be passed to the
+      // NOTE: Strange types (e->g. http_Data) cannot be passed to the
       // variadic argument function in the Logger class
       std::cout << it->getRequest() << std::endl;
 
@@ -166,9 +166,9 @@ void ConnectionManager::getMessages(iterator it) {
 void ConnectionManager::checkTimeout(void) {
   for (iterator it = clients_.begin(); it != clients_.end(); it++) {
     if (it->getTimeLastCom() && (time(NULL) - it->getTimeLastCom()) > TIMEOUT) {
-      Logger::consoleMsg(std::cout, BLUE, "%s%d%s",
-                         "Connection FD=", it->getFd(),
-                         " has been closed for inactivity");
+      Logger::getLogger().consoleMsg(
+          stdout, BLUE, "Connection FD=%d has been closed for inactivity",
+          it->getFd());
 
       if (FD_ISSET(it->getFd(), &read_socks_))
         FD_CLR(it->getFd(), &read_socks_);

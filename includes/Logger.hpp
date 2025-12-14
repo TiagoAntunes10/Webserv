@@ -2,28 +2,28 @@
 #define LOGGER_HPP
 
 #include <cstdarg>
-#include <sstream>
+#include <cstdio>
+#include <ctime>
 
 class Logger {
 public:
   ~Logger(void);
 
-  // NOTE: There isn't a need for this right now, but it my be useful
-  // Logger &getLogger(void);
+  void initLogger(void);
 
-  static void consoleMsg(std::ostream &io, std::string const colour,
-                         std::string format, ...);
+  static Logger &getLogger(void);
+
+  void consoleMsg(FILE *io, const char *colour, const char *format, ...);
 
 private:
-  typedef std::string::iterator iterator;
-
   Logger(void) {};
   Logger(Logger const &log) { (void)log; };
   Logger &operator=(Logger const &log) {
     (void)log;
     return (*this);
   };
-  static Logger log_;
+
+  time_t init_time_;
 };
 
 #define END "\033[0m"

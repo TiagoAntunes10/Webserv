@@ -3,12 +3,15 @@
 int main(void) {
   Socket socket(AF_INET, SOCK_STREAM, 0);
 
+  Logger::getLogger();
+  Logger::getLogger().initLogger();
+
   socket.bindSocket(AF_INET, htons(PORT), htonl(INADDR_ANY));
 
   socket.listenSocket(BACKLOG);
 
-  Logger::consoleMsg(std::cout, GREEN, "%s%d%s", "Listening on port ", PORT,
-                     "...");
+  Logger::getLogger().consoleMsg(stdout, GREEN, "Listening on port %d...",
+                                 PORT);
 
   ConnectionManager manager(BACKLOG, socket);
 
