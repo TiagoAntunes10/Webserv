@@ -12,7 +12,7 @@
 
 #pragma once
 
-// TODO: Remove these macros if they are not necessary
+// TODO: Remove these macros if they are not necessary (config file)
 #define PORT 8080
 #define BACKLOG 10
 #define TIMEOUT 10
