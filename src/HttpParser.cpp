@@ -117,14 +117,15 @@ unsigned short HttpParser::parseHeader(const std::string &request,
             httpReq.header.insert(std::make_pair(key, value));
         }
       }
-      if (httpReq.header.count("user-agent") != 1) {
-        responseSTAT = BAD_REQUEST;
-        // return responseSTAT;
-      }
     } else {
       responseSTAT = BAD_REQUEST;
       return responseSTAT;
     }
+  }
+
+  if (httpReq.header.count("user-agent") != 1) {
+    responseSTAT = BAD_REQUEST;
+    // return responseSTAT;
   }
 
   // Get body
