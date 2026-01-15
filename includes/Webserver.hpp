@@ -23,6 +23,7 @@
 #include "./ConnectionManager.hpp"
 #include "./HttpParser.hpp"
 #include "./Logger.hpp"
+#include "./Response.hpp"
 #include "./Socket.hpp"
 #include "./utils.hpp"
 #include <algorithm>
