@@ -17,12 +17,14 @@ public:
   ConnectionManager(ConnectionManager &manager);
   ConnectionManager &operator=(ConnectionManager &manager);
   ~ConnectionManager(void);
+
   void initManager(int backlog, Socket &socket);
   void buildFdList(Socket &socket);
   void createNewConnection(Socket &socket);
   void waitConnections(Socket &socket);
-  void getMessages(iterator it);
+  void getMessages(iterator &it);
   void checkTimeout(void);
+  void sendResponse(iterator &it);
 
 private:
   std::vector<Client> clients_;

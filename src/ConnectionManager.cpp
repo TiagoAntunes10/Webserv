@@ -1,4 +1,5 @@
 #include "../includes/Webserver.hpp"
+#include <sys/select.h>
 
 ConnectionManager::ConnectionManager(void) {
   backlog_ = 0;
@@ -29,6 +30,7 @@ ConnectionManager &ConnectionManager::operator=(ConnectionManager &manager) {
 }
 
 // TODO: Confirm there are no fds that remain open
+// NOTE: FDs are closed here to prevent problems during vector memory management
 ConnectionManager::~ConnectionManager(void) {
   FD_ZERO(&read_socks_);
   FD_ZERO(&write_socks_);
@@ -85,6 +87,8 @@ void ConnectionManager::createNewConnection(Socket &socket) {
     Logger::getLogger().consoleMsg(stderr, YELLOW, "No space for new clients!");
     close(connection);
   }
+
+  clients_.back().setTimeLastCom();
 }
 
 void ConnectionManager::waitConnections(Socket &socket) {
@@ -101,9 +105,9 @@ void ConnectionManager::waitConnections(Socket &socket) {
   if (socks < 0) {
     Logger::getLogger().consoleMsg(stderr, RED, "Error: selecting connections");
     return;
-  } else if (socks == 0)
+  } else if (socks == 0) {
     Logger::getLogger().consoleMsg(stdout, CYAN, "...");
-  else {
+  } else {
     if (FD_ISSET(socket.getServerFd(), &read_cpy))
       createNewConnection(socket);
 
@@ -111,7 +115,7 @@ void ConnectionManager::waitConnections(Socket &socket) {
       if (FD_ISSET(it->getFd(), &read_cpy))
         getMessages(it);
       else if (FD_ISSET(it->getFd(), &write_cpy)) {
-        // TODO: Do something
+        sendResponse(it);
         continue;
       }
     }
@@ -120,7 +124,7 @@ void ConnectionManager::waitConnections(Socket &socket) {
   checkTimeout();
 }
 
-void ConnectionManager::getMessages(iterator it) {
+void ConnectionManager::getMessages(iterator &it) {
   // TODO: Refactor the use of the buffer
   char *buff = new char[BUFF_SIZE];
   unsigned short stat;
@@ -135,6 +139,7 @@ void ConnectionManager::getMessages(iterator it) {
     return;
   } else if (bytes_received > 0) {
     stat = HttpParser::parseHeader(buff, dataReq);
+    it->setStatusCode(stat);
 
     if (stat == 0) {
       Logger::getLogger().consoleMsg(stderr, RED, "❌ Invalid HTTP request");
@@ -148,16 +153,17 @@ void ConnectionManager::getMessages(iterator it) {
       Logger::getLogger().consoleMsg(stdout, BLUE, "Request from FD=%d",
                                      it->getFd());
 
-      // NOTE: Strange types (e->g. http_Data) cannot be passed to the
+      // NOTE: Strange types (e.g. http_Data) cannot be passed to the
       // variadic argument function in the Logger class
       std::cout << it->getRequest() << std::endl;
 
+      // NOTE: Fd stops waiting to read and starts waiting to write
       FD_SET(it->getFd(), &write_socks_);
       FD_CLR(it->getFd(), &read_socks_);
+
+      it->setTimeLastCom();
     }
   }
-
-  it->setTimeLastCom();
 
   if (buff)
     delete[] buff;
@@ -180,11 +186,26 @@ void ConnectionManager::checkTimeout(void) {
         highsock_--;
 
       // NOTE: This is necessary because closing the clients' fd cannot be done
-      // in the destructor
+      // in the destructor (problems with vector resizing)
       close(it->getFd());
 
       clients_.erase(it);
       return;
     }
   }
+}
+
+void ConnectionManager::sendResponse(iterator &it) {
+  std::string response = it->getResponse();
+
+  if (send(it->getFd(), response.c_str(), response.length(), 0) < 0) {
+    Logger::getLogger().consoleMsg(stderr, RED,
+                                   "Error: Sending message to client");
+  }
+
+  // NOTE: Fd stops waiting to write and starts waiting to read
+  FD_SET(it->getFd(), &read_socks_);
+  FD_CLR(it->getFd(), &write_socks_);
+
+  it->setTimeLastCom();
 }
