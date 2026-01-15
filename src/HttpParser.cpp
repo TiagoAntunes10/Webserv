@@ -100,8 +100,12 @@ unsigned short HttpParser::parseHeader(const std::string &request,
       std::stringstream ss(values);
       std::string value;
 
+      // TODO: Should we separate the values by the commas? Maybe leave them
+      // together and create a function to separate the values when necessary
+      // NOTE: User-agent gives problems if the values are separated by their
+      // commmas. Are there cases where it is necessary?
       if (key == "date" || key == "if-modified-since" ||
-          key == "last-modified") {
+          key == "last-modified" || key == "user-agent") {
         httpReq.header.insert(std::make_pair(key, values));
       } else {
         while (std::getline(ss, value, ',')) {
