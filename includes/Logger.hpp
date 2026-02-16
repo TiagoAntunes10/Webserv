@@ -4,16 +4,16 @@
 #include <cstdarg>
 #include <cstdio>
 #include <ctime>
+#include <string>
 
 class Logger {
 public:
   ~Logger(void);
 
   void initLogger(void);
-
   static Logger &getLogger(void);
-
   void consoleMsg(FILE *io, const char *colour, const char *format, ...);
+  std::string getCurrentTime(void);
 
 private:
   Logger(void) {};

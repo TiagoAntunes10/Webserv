@@ -29,3 +29,15 @@ void Logger::consoleMsg(FILE *io, const char *colour, const char *format, ...) {
 
   va_end(args);
 }
+
+std::string Logger::getCurrentTime(void) {
+  time_t current_time = time(NULL);
+  struct tm *time_info = localtime(&current_time);
+  char char_date[32];
+
+  strftime(char_date, 32, "%a, %d %b %Y %T %Z", time_info);
+
+  std::string date = char_date;
+
+  return (date);
+}
