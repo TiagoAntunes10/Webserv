@@ -56,6 +56,8 @@ unsigned short HttpParser::parseHeader(const std::string &request,
     httpReq.method = DELETE;
   else if (methodStr == "PUT")
     httpReq.method = PUT;
+  else if (methodStr == "HEAD")
+    httpReq.method = HEAD;
   else
     httpReq.method = UNKNOWN;
 
@@ -135,8 +137,11 @@ unsigned short HttpParser::parseHeader(const std::string &request,
   // Get body
   std::string body((std::istreambuf_iterator<char>(iss)),
                    std::istreambuf_iterator<char>());
+  // NOTE: The previous method to read the body includes a lot of weird
+  // invisible characters at the end of the string Append body
+  //
   // Append body
-  httpReq.body = body;
+  httpReq.body = body.substr(0, body.find_last_of("\n") + 1);
 
   // Query parameters
   std::size_t IPos = httpReq.uri.find('?');
