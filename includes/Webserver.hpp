@@ -17,12 +17,15 @@
 #define BACKLOG 10
 #define TIMEOUT 10
 #define BUFF_SIZE 5000
+#define BODY_MAX_SIZE 200
+#define DEFAULT_PATH "./site"
 
 // INCLUDES
 #include "./Client.hpp"
 #include "./ConnectionManager.hpp"
 #include "./HttpParser.hpp"
 #include "./Logger.hpp"
+#include "./Mime.hpp"
 #include "./Response.hpp"
 #include "./Socket.hpp"
 #include "./utils.hpp"

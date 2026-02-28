@@ -38,7 +38,7 @@ SRC_DIR     = src
 INC_DIR     = includes
 
 FILES 		= main utils HttpParser Socket Client Logger ConnectionManager \
-			  Response
+			  Response Mime
 
 SRC 		= 	$(addprefix $(SRC_DIR)/, $(addsuffix .cpp, $(FILES)))
 OBJ 		= $(addprefix $(OBJS_DIR)/, $(addsuffix .o, $(FILES)))

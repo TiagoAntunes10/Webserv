@@ -4,6 +4,7 @@ int main(void) {
   Socket socket(AF_INET, SOCK_STREAM, 0);
 
   Logger::getLogger().initLogger();
+  Mime::getMimeInfo().initMime();
 
   // TODO: Change values with information from the config file
   socket.bindSocket(AF_INET, htons(PORT), htonl(INADDR_ANY));

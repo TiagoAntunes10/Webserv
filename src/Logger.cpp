@@ -35,7 +35,7 @@ std::string Logger::getCurrentTime(void) {
   struct tm *time_info = localtime(&current_time);
   char char_date[32];
 
-  strftime(char_date, 32, "%a, %d %b %Y %T %Z", time_info);
+  strftime(char_date, 32, "%a, %d %b %Y %H:%M:%S %Z", time_info);
 
   std::string date = char_date;
 
