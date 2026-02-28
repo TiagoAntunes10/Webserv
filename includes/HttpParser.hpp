@@ -22,7 +22,7 @@
  * acedida
  */
 
-enum HttpMethod { GET = 1, POST, DELETE, PUT, UNKNOWN };
+enum HttpMethod { GET = 1, POST, DELETE, PUT, HEAD, UNKNOWN };
 
 // REQUEST DATA (guarda informação do pedido HTTP)
 struct http_Data {
